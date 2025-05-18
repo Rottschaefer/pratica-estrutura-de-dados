@@ -64,6 +64,89 @@ void insere_aresta_um_sentido(Node* grafo, int id_node_1, int id_node_2){
     new_aresta->prox_aresta = old_aresta;
 }
 
+void insere_aresta(Node* grafo, int id_node_1, int id_node_2){
+    insere_aresta_um_sentido(grafo, id_node_1, id_node_2);
+    insere_aresta_um_sentido(grafo, id_node_2, id_node_1);
+}
+
+void retira_aresta_um_sentido(Node* grafo, int aresta_a_retirar, int node_da_aresta){
+    Node* node = busca_node(grafo, node_da_aresta);
+
+    Aresta* aresta = node->prim_viz;
+
+    Aresta* ant = NULL;
+
+    while(aresta && aresta->id_info != aresta_a_retirar){
+        ant = aresta;
+        aresta = aresta->prox_aresta;
+    }
+
+    if(!aresta){
+        printf("**Essa aresta não existe**\n");
+        return;
+    }
+
+
+    if(!ant) node->prim_viz = aresta->prox_aresta;
+    else ant->prox_aresta = aresta->prox_aresta;
+
+    free(aresta);
+
+}
+
+void retira_aresta(Node* grafo, int id_node_1, int id_node_2){
+    retira_aresta_um_sentido(grafo, id_node_1, id_node_2);
+    retira_aresta_um_sentido(grafo, id_node_2, id_node_1);
+}
+
+void libera_aresta(Aresta* aresta){
+    if(!aresta) return;
+
+    libera_aresta(aresta->prox_aresta);
+    free(aresta);
+}
+
+Node* retira_node(Node* grafo, int id_node){
+    Node* node = grafo, *ant;
+
+    while(node->id_node != id_node) {
+        ant = node;
+        node = node->prox_no;
+    }
+
+    Aresta* aresta = node->prim_viz, *temp;
+
+    while(aresta){
+        temp = aresta->prox_aresta;
+
+        retira_aresta(grafo, node->id_node, aresta->id_info);
+        aresta = temp;
+    }
+
+    if(!ant){
+        Node* new = node->prox_no;
+        free(node);
+        return new;
+    } 
+
+    ant->prox_no = node->prox_no;
+    free(node);
+
+    return grafo;
+}
+
+void libera_TG(Node* grafo){
+
+    if(!grafo) return;
+
+    libera_TG(grafo->prox_no);
+    libera_aresta(grafo->prim_viz);
+
+
+    free(grafo);
+
+}
+
 void imprime_grafo(Node* grafo){
     while(grafo){
         printf("%d :", grafo->id_node);

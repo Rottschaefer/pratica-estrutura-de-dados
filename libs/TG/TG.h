@@ -15,5 +15,14 @@ Node* insere_node(Node* grafo, int id_node);
 
 void insere_aresta_um_sentido(Node* grafo, int id_node_1, int id_node_2);
 
+void insere_aresta(Node* grafo, int id_node_1, int id_node_2);
+
+void retira_aresta(Node* grafo, int id_node_1, int id_node_2);
+
+Node* retira_node(Node* grafo, int id_node);
+
+
+void libera_TG(Node* grafo);
+
 void imprime_grafo(Node* grafo);
 
