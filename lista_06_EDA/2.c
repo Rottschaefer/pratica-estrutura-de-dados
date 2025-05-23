@@ -13,6 +13,7 @@ typedef struct cliente{
 void criar_clientes(){
     FILE* nomes = fopen("nomes.bin", "rb");
     FILE* cpfs = fopen("cpfs.bin", "rb");
+    FILE* saldos = fopen("saldos.bin", "rb");
     FILE* clientes = fopen("clientes.bin", "ab");
 
     fseek(cpfs, 0, SEEK_END);
@@ -24,11 +25,14 @@ void criar_clientes(){
     {
         Cliente * new = (Cliente*)malloc(sizeof(Cliente));
         new->agencia = 300;
-        new->saldo = 45.0;
         fscanf(cpfs, "%s", new->CPF);
         fseek(cpfs, 1, SEEK_CUR);
         fgets(new->nome, sizeof(new->nome), nomes);
         // fseek(nomes, 1, SEEK_CUR);
+        fscanf(saldos, "%f", &(new->saldo));
+        // fread(&(new->saldo), sizeof(new->saldo), 1, saldos);
+        fseek(saldos, 1, SEEK_CUR);
+
 
         fwrite(new, sizeof(Cliente), 1, clientes);
 
