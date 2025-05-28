@@ -1,6 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+
+void copy_and_clean(int* vet1, int* vet2, int size){
+    for (int i = 0; i < size; i++)
+    {
+        vet1[i] = vet2[i];
+        vet2[i] = 0;
+    }
+    
+}
+
+void print_array(int * array, int size){
+    for (int i = 0; i < size; i++)
+        {
+            printf("%d\n", array[i]);
+        }
+
+    printf("\n\n");
+}
 
 int indice_menor(int m, int vet[m]){
 
@@ -14,59 +33,109 @@ int indice_menor(int m, int vet[m]){
     
 }
 
-void sel_natural(FILE* file, int m){
+void particiona(FILE* file, int* array, int* reservatorio, int* size, int num_particao){
 
-
-    int* array = (int*)malloc(sizeof(int)*m);
-    int* reservatorio = (int*)malloc(sizeof(int)*m);
 
     int pos_reservatorio = 0;
 
-    int array_size = 0;
-
-
     int k = 0;
-    int num_particao = 0;
-    
 
-    while (k != EOF)
-    {   
-        num_particao++;
-        char nome_file[30];
-        sprintf(nome_file ,"%d_particao", num_particao);
+    char nome[30];
+    sprintf(nome, "%d_particao", num_particao);
 
-        for(array_size = 0; array_size < m; array_size++){
+    FILE* particao = fopen(nome, "w");
 
-            k = fscanf(file, "%d", &array[array_size]);
-            printf("Particao: %d, %d\n", num_particao, array[array_size]);
-            if(k == EOF) break;
-        }
+    int menor = array[0];
 
-        FILE* particao = fopen(nome_file, "w");
+    while(menor != INT_MAX){
+        // printf("%d %d", pos_reservatorio, size);
 
-        int i_menor = indice_menor(m, array);
+        printf("Array:\n");
+        print_array(array, *size);
 
-        printf("\n%d\n", i_menor);
+        printf("Reservatorio:\n");
+        print_array(reservatorio, pos_reservatorio);
+
+
+        int i_menor = indice_menor(*size, array);
 
         int menor = array[i_menor];
 
-        fprintf(particao, "%d", menor);
+        if(menor == INT_MAX) break;
+
+        fprintf(particao, "%d\n", menor);
+
 
         k = fscanf(file, "%d", &array[i_menor]);
 
-       while (k != EOF && array[i_menor] < menor){
-            reservatorio[pos_reservatorio] = array[i_menor];
-            k = fscanf(file, "%d", &array[i_menor]);
-       }
+        if(k == EOF) array[i_menor] = INT_MAX;
+
         
+
+        while(pos_reservatorio<=*size && array[i_menor] < menor){
+            printf("\n\nNumero %d foi pro reservatorio\n\n", array[i_menor]);
+            reservatorio[pos_reservatorio] = array[i_menor];
+            pos_reservatorio++;
+            k = fscanf(file, "%d", &array[i_menor]);
+
+            if(k == EOF) {
+                array[i_menor] = INT_MAX;
+                break;
+            }
+        }
+
     }
+
+    *size = pos_reservatorio;
+
+}
+
+void sel_natural(FILE* file, int m){
+
+    int * array = (int*)malloc(sizeof(int)*m);
+    int * reservatorio = (int*)malloc(sizeof(int)*m);
+
+
+
+    int k = 0;
+    int num_particao=1;
+
+    int size = 0;
+    for (size = 0; (size < m && k != EOF); size++)
+    {
+        k = fscanf(file, "%d", &array[size]);
+    }
+
+
+    printf("Primeiro array passado:\n");
     
+    print_array(array, size);
+
+    while(size != 0){
+        particiona(file, array, reservatorio, &size, num_particao);
+        int* temp = array;
+        array = reservatorio;
+        reservatorio = temp;
+        num_particao++;
+
+
+    }
+        
+
+    free(array);
+    free(reservatorio);
     
 }
 
 int main(){
 
     FILE* file = fopen("../source.txt", "r");
+
+    // int vet[10];
+
+    // fscanf(file, "%d", vet);
+
+    // printf("%s", vet[0]);
 
     sel_natural(file, 10);
     return 0;
