@@ -3,16 +3,14 @@
 #include <string.h>
 #include <limits.h>
 
-void copy_and_clean(int* vet1, int* vet2, int size){
-    for (int i = 0; i < size; i++)
+void inicializa_vetor(int* vet, int m){
+     for (int i = 0; i < m; i++)
     {
-        vet1[i] = vet2[i];
-        vet2[i] = 0;
+        vet[i] = INT_MAX;
     }
-    
-}
 
-void print_array(int * array, int size){
+}
+void print_vetor(int * array, int size){
     for (int i = 0; i < size; i++)
         {
             printf("%d\n", array[i]);
@@ -33,97 +31,95 @@ int indice_menor(int m, int vet[m]){
     
 }
 
-void particiona(FILE* file, int* array, int* reservatorio, int* size, int num_particao){
+int calc_nova_particao(FILE* file, int size_vet_atual, int vet_atual[size_vet_atual], int* reservatorio, int num_particao){
 
+    char nome[20];
 
-    int pos_reservatorio = 0;
-
-    int k = 0;
-
-    char nome[30];
-    sprintf(nome, "%d_particao", num_particao);
+    sprintf(nome, "%d_particao.txt", num_particao);
 
     FILE* particao = fopen(nome, "w");
 
-    int menor = array[0];
-
-    while(menor != INT_MAX){
-        // printf("%d %d", pos_reservatorio, size);
-
-        printf("Array:\n");
-        print_array(array, *size);
-
-        printf("Reservatorio:\n");
-        print_array(reservatorio, pos_reservatorio);
+    int s = 0;
+    int reserv_pos = 0;
 
 
-        int i_menor = indice_menor(*size, array);
+    while(1){
 
-        int menor = array[i_menor];
+        int i_menor = indice_menor(size_vet_atual, vet_atual);
+
+        int menor = vet_atual[i_menor];
+
 
         if(menor == INT_MAX) break;
+        
+
 
         fprintf(particao, "%d\n", menor);
 
+        if(reserv_pos < size_vet_atual) {
+            s = fscanf(file, "%d", &vet_atual[i_menor]);
+            if(s == EOF) vet_atual[i_menor] = INT_MAX;
 
-        k = fscanf(file, "%d", &array[i_menor]);
-
-        if(k == EOF) array[i_menor] = INT_MAX;
-
-        
-
-        while(pos_reservatorio<=*size && array[i_menor] < menor){
-            printf("\n\nNumero %d foi pro reservatorio\n\n", array[i_menor]);
-            reservatorio[pos_reservatorio] = array[i_menor];
-            pos_reservatorio++;
-            k = fscanf(file, "%d", &array[i_menor]);
-
-            if(k == EOF) {
-                array[i_menor] = INT_MAX;
-                break;
-            }
         }
+        else vet_atual[i_menor] = INT_MAX; //Tirar valor que já gravei do array caso nao leia mais nada do arquivo
 
+       
+        while(vet_atual[i_menor] < menor){
+
+            reservatorio[reserv_pos++] = vet_atual[i_menor];
+
+            if(reserv_pos < size_vet_atual) {
+                s = fscanf(file, "%d", &vet_atual[i_menor]);
+                if(s == EOF) vet_atual[i_menor] = INT_MAX;
+            }
+            else vet_atual[i_menor] = INT_MAX; //Tirar valor que já gravei do array caso nao leia mais nada do arquivo
+
+        }
+        
+        
     }
 
-    *size = pos_reservatorio;
+    fclose(particao);
+
+    return reserv_pos; //Vai ser o tamanho do proximo vetor analisado
+
 
 }
 
 void sel_natural(FILE* file, int m){
 
-    int * array = (int*)malloc(sizeof(int)*m);
-    int * reservatorio = (int*)malloc(sizeof(int)*m);
 
+    int* vet_atual = (int*)malloc(sizeof(int)*m);
+    int* reservatorio = (int*)malloc(sizeof(int)*m);
 
+    inicializa_vetor(vet_atual, m);
+    inicializa_vetor(reservatorio, m);
 
-    int k = 0;
-    int num_particao=1;
-
-    int size = 0;
-    for (size = 0; (size < m && k != EOF); size++)
+    int s = 0;
+    for (int i = 0; (s != EOF && i < m) ; i++)
     {
-        k = fscanf(file, "%d", &array[size]);
+        s = fscanf(file, "%d", &vet_atual[i]);
     }
-
-
-    printf("Primeiro array passado:\n");
     
-    print_array(array, size);
+    int size = m;
+    int i = 1;
 
-    while(size != 0){
-        particiona(file, array, reservatorio, &size, num_particao);
-        int* temp = array;
-        array = reservatorio;
+    while (size != 0)
+    {
+        size = calc_nova_particao(file, m, vet_atual, reservatorio, i);
+        i++;
+
+        int* temp = vet_atual;
+        vet_atual = reservatorio;
         reservatorio = temp;
-        num_particao++;
-
-
     }
-        
+    
+    printf("\nPartições prontas!\n");
 
-    free(array);
+    free(vet_atual);
     free(reservatorio);
+
+   
     
 }
 
@@ -131,12 +127,8 @@ int main(){
 
     FILE* file = fopen("../source.txt", "r");
 
-    // int vet[10];
-
-    // fscanf(file, "%d", vet);
-
-    // printf("%s", vet[0]);
-
     sel_natural(file, 10);
+
+    fclose(file);
     return 0;
 }
