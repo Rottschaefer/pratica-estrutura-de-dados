@@ -3,10 +3,10 @@
 #include <string.h>
 
 int compara (const void* a, const void* b){
-    char* c = (char*)a;
-    char* d = (char*)b;
+    int c = atoi((char*)a);
+    int d = atoi((char*)b);
 
-    int cmp = strcmp(c, d);
+    int cmp = c - d;
 
     if(cmp < 0) return -1;
     if(cmp == 0) return 0;
@@ -42,6 +42,7 @@ void gerar_particoes(FILE* file, int n){
             strcpy(vet[i], "");
         }
 
+        fclose(output);
         j++;
     }
 
@@ -55,7 +56,7 @@ int main(){
    gerar_particoes(file, 5);
    
     
-   
+   fclose(file);
     
 
     return 0;
