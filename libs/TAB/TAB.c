@@ -110,3 +110,4 @@ void TAB_libera(TAB *a){
     free(a);
   }
 }
+
