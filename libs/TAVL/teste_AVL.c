@@ -3,6 +3,14 @@
 int main(int argc, char *argv[]){
   TAVL *arvore = NULL;
   int num = 0, from, to;
+
+  int vet[] = {12, 18, 8, 17, 11, 5, 4};
+
+  for (int i = 0; i < sizeof(vet)/sizeof(vet[0]); i++)
+  {
+    arvore = TAVL_insere(vet[i], arvore);
+  }
+  
   while(num != -1){
     printf("Digite um numero para adicionar. 0 para imprimir. -9 para remover e -1 para sair\n");
     scanf("%i", &num);

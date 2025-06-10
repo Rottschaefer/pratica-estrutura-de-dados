@@ -26,3 +26,5 @@ void libera_TG(Node* grafo);
 
 void imprime_grafo(Node* grafo);
 
+Node* busca_node(Node* grafo, int id_node);
+int conta_nodes(Node* grafo);

@@ -125,9 +125,9 @@ void sel_natural(FILE* file, int m){
 
 int main(){
 
-    FILE* file = fopen("../source.txt", "r");
+    FILE* file = fopen("../numeros_randomicos.txt", "r");
 
-    sel_natural(file, 10);
+    sel_natural(file, 50);
 
     fclose(file);
     return 0;

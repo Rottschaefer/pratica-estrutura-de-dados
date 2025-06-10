@@ -164,3 +164,8 @@ void imprime_grafo(Node* grafo){
         
     }
 }
+
+int conta_nodes(Node* grafo){
+    if(!grafo) return 0;
+    return 1 + conta_nodes(grafo->prox_no);
+}
