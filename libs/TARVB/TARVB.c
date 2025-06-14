@@ -43,17 +43,6 @@ void TARVB_Imprime(TARVB *a){
   imp_rec(a, 0);
 }
 
-void insere_chave_array(TARVB* arvb, int n){
-
-    int i = arvb->nchaves -1;
-
-    while(i >= 0 && arvb->chave[i] > n){
-        arvb->chave[i+1] = arvb->chave[i];
-        i--;
-    }
-
-    arvb->chave[i+1] = n;
-}
 
 TARVB* Divide(TARVB* pai, TARVB* filho, int t){
 
@@ -61,27 +50,17 @@ TARVB* Divide(TARVB* pai, TARVB* filho, int t){
     //Sobe a chave do meio para o pai
     int pos = pai->nchaves -1;
 
-    if(pai->nchaves == 0){
-        pai->chave[pos] = filho->chave[t-1];
-        pai->nchaves++;
-        pos++;
-    }
-    else{
-        while(pos >= 0 && pai->chave[pos] > filho->chave[t-1]){
-        pai->chave[pos+1] = pai->chave[pos];
-        pai->filho[pos+2] = pai->filho[pos+1];
-        pos--;
-    }
 
-        pos++;
-        pai->chave[pos] = filho->chave[t-1];
-        pai->nchaves++;
+    while(pos >= 0 && pai->chave[pos] > filho->chave[t-1]){
+    pai->chave[pos+1] = pai->chave[pos];
+    pai->filho[pos+2] = pai->filho[pos+1];
+    pos--;
+        }
 
-    }
- 
-    
+    pos++;
+    pai->chave[pos] = filho->chave[t-1];
+    pai->nchaves++;
 
-    
 
     //Cria novo nó e transfere a metade superior das chaves e ponteiros do filho para ele
     TARVB* novo_filho = cria_no(t);
@@ -96,19 +75,20 @@ TARVB* Divide(TARVB* pai, TARVB* filho, int t){
         filho->filho[i] = NULL;
     }
 
-    novo_filho->filho[i] = filho->filho[2*t];
-    filho->filho[2*t] = NULL;
+    novo_filho->filho[i-t] = filho->filho[2*t-1];
+    filho->filho[2*t-1] = NULL;
 
 
     filho->nchaves = t-1;
-    
+
     //Ponteiros ao redor do valor que subiu recebem os filhos
     pai->filho[pos] = filho;
     pai->filho[pos+1] = novo_filho;
 
+
     return pai;
 
-    
+
 }
 
 TARVB* TARVB_insere(TARVB* arvb, int num, int t){
@@ -125,19 +105,18 @@ TARVB* TARVB_insere(TARVB* arvb, int num, int t){
     //Caso 2: Raíz cheia
     if(arvb->nchaves == (2*t - 1)){
 
-        printf("Raiz cheia");
         TARVB* novo_pai = cria_no(t);
         novo_pai->folha = 0;
-        novo_pai->filho[0] = arvb;  // Primeiro filho é a antiga raiz
 
-        
+
         arvb = Divide(novo_pai, arvb, t);
-        
+
+
         if(num > arvb->chave[0]) arvb->filho[1] = TARVB_insere(arvb->filho[1], num, t);
         else arvb->filho[0] = TARVB_insere(arvb->filho[0], num, t);
 
         return arvb;
-        
+
     }
 
     //Checa os filhos do nó para saber se algum está cheio
@@ -148,8 +127,8 @@ TARVB* TARVB_insere(TARVB* arvb, int num, int t){
                 arvb = Divide(arvb, arvb->filho[i], t);
             }
         }}
-    
-   
+
+
     //Caso Trivial: Nó é folha e tem menos que 2t-1 chaves
     if(arvb->folha && arvb->nchaves < (2*t-1)){
         int i = arvb->nchaves - 1;
@@ -172,7 +151,7 @@ TARVB* TARVB_insere(TARVB* arvb, int num, int t){
     while (i < (arvb->nchaves) && arvb->chave[i] < num ) i++;
 
     arvb->filho[i] = TARVB_insere(arvb->filho[i], num, t);
-    
+
 
     return arvb;
 }
