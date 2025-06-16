@@ -17,7 +17,7 @@ TARVB* cria_no(int t){
     for (int i = 0; i < (2*t - 1); i++)
     {
         no->filho[i] = NULL;
-        no->chave[i] = INT_MIN;
+        no->chave[i] = INT_MAX;
     }
 
     no->filho[(2*t - 1)] = NULL;
@@ -154,4 +154,112 @@ TARVB* TARVB_insere(TARVB* arvb, int num, int t){
 
 
     return arvb;
+}
+
+TARVB* TARVB_retira(TARVB* arvb, int n, int t){
+    if(!arvb) return NULL;
+
+    int i = 0;
+    while (n > arvb->chave[i]) i++;
+
+    if(arvb->chave[i] != n) return TARVB_retira(arvb->filho[i], n, t);
+
+
+    //CASO 1: n é folha e pode ser retirado sem problemas
+    if(arvb->folha){
+        printf("\nCaso 1\n");
+        int k = arvb->nchaves - 1; //Penúltimo
+
+        for (int j = i; j < k; j++)
+        {
+            arvb->chave[j] = arvb->chave[j+1];
+        }
+
+        arvb->chave[k] = INT_MAX;
+
+
+        arvb->nchaves--;
+
+        return arvb;
+    }
+
+    //CASO 2A: filho predecessor tem pelo menos t chaves
+    if(arvb->filho[i]->nchaves >= t){
+        printf("\nCaso 2A\n");
+
+       TARVB* filho = arvb->filho[i];
+
+       arvb->chave[i] = filho->chave[filho->nchaves-1];
+
+       return TARVB_retira(filho, filho->chave[filho->nchaves-1], t);
+    }
+
+    //CASO 2B: filho sucessor tem pelo menos t chaves
+    if(arvb->filho[i+1]->nchaves >= t){
+        printf("\nCaso 2B\n");
+
+        TARVB* filho = arvb->filho[i+1];
+
+        arvb->chave[i] = filho->chave[0];
+
+        return TARVB_retira(filho, filho->chave[0], t);
+    }
+
+    //CASO 2C: filhos predecessor e sucessor tem t-1 chaves
+
+    printf("\nCaso 2C\n");
+
+
+    //Coloco o n no meio do novo filho(junção do sucessor com predecessor)
+    arvb->filho[i]->chave[arvb->filho[i]->nchaves] = n;
+    arvb->filho[i]->nchaves++;
+
+    int offset = arvb->filho[i]->nchaves;
+
+    for (int j = 0; j < arvb->filho[i+1]->nchaves; j++)
+    {
+        arvb->filho[i]->chave[offset + j] = arvb->filho[i+1]->chave[j];
+        arvb->filho[i]->filho[offset + j] = arvb->filho[i+1]->filho[j];
+        arvb->filho[i+1]->filho[j] = NULL; //Para evitar de liberar os filhos na hora de dar free
+        arvb->filho[i]->nchaves++;
+    }
+
+    arvb->filho[i]->filho[arvb->filho[i]->nchaves] = arvb->filho[i+1]->filho[arvb->filho[i+1]->nchaves];
+    arvb->filho[i+1]->filho[arvb->filho[i+1]->nchaves] = NULL;
+
+
+    TARVB_libera(arvb->filho[i+1]);
+
+    // arvb->chave[i] = n;
+
+    //Retira chave do nó pai
+    for (int j = i; j < arvb->nchaves-1; j++)
+    {
+        arvb->chave[j] = arvb->chave[j+1];
+        arvb->chave[j+1] = INT_MAX;
+        arvb->filho[j+1] = arvb->filho[j+2];
+        arvb->filho[j+2] = NULL;
+    }
+
+    arvb->nchaves--;
+
+
+    arvb->filho[i] = TARVB_retira(arvb->filho[i], n, t);
+    
+    return arvb;
+    
+}
+
+void TARVB_libera(TARVB* arvb){
+    if(!arvb) return;
+
+    for (int i = 0; i < arvb->nchaves+1; i++)
+    {
+        TARVB_libera(arvb->filho[i]);
+    }
+
+    free(arvb->chave);
+    free(arvb->filho);
+    free(arvb);
+    
 }
