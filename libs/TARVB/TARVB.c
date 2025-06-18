@@ -198,6 +198,59 @@ TARVB* TARVB_retira(TARVB* arvb, int n, int t){
             return arvb;
 
         }
+        //CASO 3B
+
+        printf("\nCASO 3B\n");
+
+        TARVB* filho_esq = arvb->filho[i];
+        TARVB* filho_dir = arvb->filho[i+1];
+
+        filho_esq->chave[filho_esq->nchaves] = arvb->chave[i];
+        filho_esq->nchaves++;
+
+        int j = 0;
+        for (j = 0; j < filho_dir->nchaves; j++)
+        {
+            filho_esq->chave[filho_esq->nchaves] = filho_dir->chave[j];
+            filho_esq->filho[filho_esq->nchaves] = filho_dir->filho[j];
+            filho_dir->filho[j] = NULL;
+            filho_esq->nchaves++;
+
+        }
+        
+        filho_esq->filho[filho_esq->nchaves] = filho_dir->filho[j];
+        filho_dir->filho[j] = NULL;
+
+        TARVB_libera(filho_dir);
+
+        for (j = i; j < arvb->nchaves - 1; j++)
+        {
+            arvb->chave[j] = arvb->chave[j+1];
+            arvb->filho[j+1] = arvb->filho[j+2];
+        }
+
+        arvb->nchaves--;
+        arvb->chave[arvb->nchaves] = INT_MAX;
+        arvb->filho[j+1] = NULL;
+
+
+        arvb->filho[i] = TARVB_retira(arvb->filho[i], n, t);
+
+        if(arvb->nchaves == 0){
+            //Arvb era raiz e perdeu o elemento que tinha
+
+            TARVB* temp = arvb;
+            arvb = arvb->filho[0];
+            temp->filho[0] = NULL;
+
+            TARVB_libera(temp);
+
+            return arvb;
+        }
+
+        return arvb;
+        
+
     }
 
 
