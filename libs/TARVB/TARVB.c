@@ -162,7 +162,43 @@ TARVB* TARVB_retira(TARVB* arvb, int n, int t){
     int i = 0;
     while (n > arvb->chave[i]) i++;
 
-    if(arvb->chave[i] != n) return TARVB_retira(arvb->filho[i], n, t);
+    if(arvb->chave[i] != n) {
+        
+        if(arvb->filho[i]->nchaves >= t) return TARVB_retira(arvb->filho[i], n, t);
+
+        //CASO 3A
+
+        if(arvb->filho[i+1]->nchaves >=t){
+
+            printf("\nCASO 3A\n");
+            TARVB* filho_esq = arvb->filho[i];
+            TARVB* filho_dir = arvb->filho[i+1];
+
+            filho_esq->chave[filho_esq->nchaves] = arvb->chave[i];
+            filho_esq->nchaves++;
+            filho_esq->filho[filho_esq->nchaves] = filho_dir->filho[0];
+
+            arvb->chave[i] = filho_dir->chave[0];
+
+            int j = 0;
+
+            for (j = 0; j < filho_dir->nchaves - 1; j++)
+            {
+                filho_dir->chave[j] = filho_dir->chave[j+1];
+                filho_dir->filho[j] = filho_dir->filho[j+1];
+            }
+            
+            filho_dir->chave[j] = INT_MAX;
+            filho_dir->filho[j] = filho_dir->filho[j+1];
+            filho_dir->filho[j+1] = NULL;
+            filho_dir->nchaves--;
+
+            arvb->filho[i] =  TARVB_retira(arvb->filho[i], n, t);
+
+            return arvb;
+
+        }
+    }
 
 
     //CASO 1: n é folha e pode ser retirado sem problemas
