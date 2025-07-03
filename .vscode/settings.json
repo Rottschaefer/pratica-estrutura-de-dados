@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "tab.h": "c"
+        "tab.h": "c",
+        "stdio.h": "c",
+        "tarvb.h": "c",
+        "tlseint.h": "c"
     }
 }
